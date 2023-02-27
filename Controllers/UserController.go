@@ -139,7 +139,14 @@ func SignUp() gin.HandlerFunc {
 
 }
 
-func GetBalance() {
+func GetBalanceHistory() gin.HandlerFunc{
+
+	return func(c *gin.Context){
+		
+     fmt.Println(balance.BalanceRecord)
+		
+	}
+
 
 }
 
@@ -208,14 +215,21 @@ func ConvertCurrency() gin.HandlerFunc {
 		if err :=helper.CheckUserType(c, "USER") ; err!=nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 			return
-			Balance.Balance-= 100
+			Balance.Balance-= 5
+        
+		//Record Transaction History	
+		 Balance.BalanceRecord = append(balance.BalanceRecord, balance.Balance)
 		}
+
+		
 			
 		if err :=helper.CheckUserType(c, "ADMIN") ; err!=nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error":err.Error()})
 			return
-			AppBalance.Balance-= 100
+			AppBalance.Balance-= 5
 		}
+
+
 			
 		c.JSON(http.StatusOK, response)
 

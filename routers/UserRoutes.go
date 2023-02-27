@@ -11,9 +11,7 @@ import (
 func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.Use(middleware.Authenticate())
 
-	incomingRoutes.GET("/users/GetBalance", controllers.GetBalance())
-
-	incomingRoutes.GET("/users", controllers.GetUsers())
+	incomingRoutes.GET("/users/GetBalance", controllers.GetBalanceHistory())
 	incomingRoutes.GET("/users", controllers.ConvertCurrency())
 	
 }

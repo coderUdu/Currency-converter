@@ -11,7 +11,7 @@ type User struct {
 	User_ID      *string            `json: "user_id"`
 	userType     *string            `json: "usertype" validate:"required, eq=ADMIN|eq=USER"`
 	Balance      float64            `json:"balance"`
-	BalanceAt    time.Time          `json:balance_at`
+	BalanceRecord []float64         `json:"balancerecord"` 
 	Password     *string            `json:"password" validate:"required,min = 8"`
 	HashPassword *string            `json:"Hashpassword"`
 	Token        *string            `json:"token"`

@@ -20,6 +20,7 @@ type SignedDetails struct {
 	Email    string
 	UID      string
 	UserType string
+	User_ID  string
 	jwt.StandardClaims
 }
 
@@ -69,7 +70,7 @@ func UpdateAllTokens(signedToken, signedRefreshToken, userID string) {
 	updatedObj = append(updatedObj, bson.E{"updatedAt", updatedAt})
 
 	upsert := true
-	filter := bson.M{"userID": UserID}
+	filter := bson.M{"user_id": userID}
 	opt := options.UpdateOptions{
 		Upsert: &upsert,
 	}

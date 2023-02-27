@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/currencyconverter/controllers"
-) 
+)
 
 func Authroutes(incomingRoutes *gin.Engine) {
 
@@ -12,5 +12,4 @@ func Authroutes(incomingRoutes *gin.Engine) {
 
 	incomingRoutes.POST("users/login", controllers.Login())
 
-	
 }

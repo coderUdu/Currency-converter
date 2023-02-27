@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/currencyconverter/database"
@@ -22,10 +23,9 @@ var userCollection *mongo.Collection = database.OpenCollection(database.Client, 
 
 var validate = validator.New()
 
-var Balance models.User.Account == 100
+var Balance models.User = 100
 
-var AppBalance models.User.Account == 0
-
+var AppBalance models.User = 0
 
 func Login() gin.HandlerFunc {
 
@@ -165,28 +165,41 @@ func CreditApp() {
 
 }
 
-func Conversion() gin.HandlerFunc {
+func ConvertCurrency() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var response struct{
-			From  string
-			To    string
-			Amount float64
-		}
-    
-		Models.Currency.Currencies := GetAllCurrency()
+		amount := c.Query("amount")
+		from := c.Query("from")
+		to := c.Query("to")
 
+
+		
+
+		data, err := GetAllCurrency()
+		if err!=nil{
+			log.Fatal("NewRequest: ", err)
+		}
 
 		var fromValue float64
-		fromValue = getCurrencyValue(from, data)
+		fromValue = GetCurrencyValue(from, data)
 
 		var toValue float64
-		toValue = getCurrencyValue(to, data)
+		toValue = GetCurrencyValue(to, data)
 
-		var convertedAmount float64
+		var amountConverted float64
 
 		floatAmount, _ := strconv.ParseFloat(amount, 8)
-		convertedAmount = (floatAmount * toValue) / fromValue
+		amountConverted = (floatAmount * toValue) / fromValue
+
+		var response struct {
+			From   string
+			To     string
+			Amount float64
+		}
+
+		c.JSON(http.StatusOK, response)
+
+		
 	}
 
 }
@@ -196,19 +209,21 @@ func GetCurrencyValue(moneyCurrency string, data models.Currency) float64 {
 	var value float64
 
 	if moneyCurrency == "USD" {
-		value = float64(data.Currencies.NGN)
-	} else if moneyCurrency == "USD" {
-		value = float64(data.Currencies.USD)
+		value = 737.7
+	} else if moneyCurrency == "NGN" {
+		value = 757.7
 	}
 	return value
 }
 
-func GetAllCurrency() models.Currency.Currencies{
+func GetAllCurrency() (Currency, error) {
 
-	if models.Currency.Currencies == NGN {
-		return NGN
-	}else if models.Currency.Currencies == USD {
-		return USD
-	}
-      return models.Currency.Currencies
+	// if models.Currency.Currencies == NGN {
+	// 	return NGN
+	// }else if models.Currency.Currencies == USD {
+	// 	return USD
+	// }
+	//   return models.Currency.Currencies
+
+	return "NGN", "USD"
 }

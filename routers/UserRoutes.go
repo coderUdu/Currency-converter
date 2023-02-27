@@ -8,11 +8,12 @@ import (
 
 
 
-func UserRoutes(){
+func UserRoutes(incomingRoutes *gin.Engine){
 	incomingRoutes.Use(middleware.Authenticate())
 
 	incomingRoutes.GET("/users/GetBalance", controllers.GetBalance())
 
 	incomingRoutes.GET("/users", controllers.GetUsers())
+	incomingRoutes.GET("/users", controllers.ConvertCurrency())
 	
 }

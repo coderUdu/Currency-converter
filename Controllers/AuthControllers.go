@@ -2,9 +2,11 @@ package controllers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -23,9 +25,7 @@ var userCollection *mongo.Collection = database.OpenCollection(database.Client, 
 
 var validate = validator.New()
 
-var Balance models.User = 100
 
-var AppBalance models.User = 0
 
 func Login() gin.HandlerFunc {
 
@@ -48,7 +48,7 @@ func Login() gin.HandlerFunc {
 			return
 		}
 
-		passwordIsValid, msg := VerifyPassword(user.Password, foundUser.Password)
+		passwordIsValid, msg := VerifyPassword(*user.Password, *foundUser.Password)
 		if passwordIsValid != true {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": msg})
 			return
@@ -60,8 +60,8 @@ func Login() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "user not found"})
 		}
 
-		token, refreshtoken, err := helper.GenerateAllTokens(foundUser.Email, foundUser.User_ID, *foundUser.User_Type)
-		helper.UpdateAllTokens(token, refreshtoken, foundUser.User_ID)
+		token, refreshtoken, err := helper.GenerateAllTokens(foundUser.Email, foundUser.User_ID, foundUser.UserType)
+		helper.UpdateAllTokens(token, refreshtoken, *foundUser.User_ID)
 		err = userCollection.FindOne(ctx, bson.M{"user_id": foundUser.User_ID}).Decode(&foundUser)
 
 		if err != nil {
@@ -173,8 +173,6 @@ func ConvertCurrency() gin.HandlerFunc {
 		to := c.Query("to")
 
 
-		
-
 		data, err := GetAllCurrency()
 		if err!=nil{
 			log.Fatal("NewRequest: ", err)
@@ -191,6 +189,8 @@ func ConvertCurrency() gin.HandlerFunc {
 		floatAmount, _ := strconv.ParseFloat(amount, 8)
 		amountConverted = (floatAmount * toValue) / fromValue
 
+		fmt.Println(amountConverted)
+
 		var response struct {
 			From   string
 			To     string
@@ -204,26 +204,44 @@ func ConvertCurrency() gin.HandlerFunc {
 
 }
 
-func GetCurrencyValue(moneyCurrency string, data models.Currency) float64 {
+func GetCurrencyValue(moneyCurrency string, data models.Currencies) float64 {
 
 	var value float64
 
 	if moneyCurrency == "USD" {
-		value = 737.7
+		value = data.USD
 	} else if moneyCurrency == "NGN" {
-		value = 757.7
+		value = data.NGN
 	}
 	return value
 }
 
-func GetAllCurrency() (Currency, error) {
+func GetAllCurrency() (models.Currencies, error) {
+	
+	// apiToken := os.Getenv("FIXER_API")
 
-	// if models.Currency.Currencies == NGN {
-	// 	return NGN
-	// }else if models.Currency.Currencies == USD {
-	// 	return USD
-	// }
-	//   return models.Currency.Currencies
+	url := fmt.Sprintf( "https://staging-biz.coinprofile.co/v3/currency/rate")
 
-	return "NGN", "USD"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal("NewRequest: ", err)
+		return models.Currencies{}, err
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Do: ", err)
+		return models.Currencies{}, err
+	}
+
+	defer resp.Body.Close()
+
+	var record models.Currencies
+
+	if err := json.NewDecoder(resp.Body).Decode(&record); err != nil {
+		log.Println(err)
+	}
+	return record, nil
 }
